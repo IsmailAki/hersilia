@@ -1,11 +1,13 @@
 package main
 
-import "net/http"
+import (
+	"github.com/abdullahaki/hersilia/controllers"
+	"net/http"
+)
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello, world!"))
-	})
+	mux.HandleFunc("/", controllers.Hello)
+
 	http.ListenAndServe(":8080", mux)
 }
