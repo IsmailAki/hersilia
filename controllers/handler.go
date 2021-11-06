@@ -16,6 +16,7 @@ type Handler struct {
 }
 
 func ReqHandler(w http.ResponseWriter, r *http.Request) {
+
 	data := db.New()
 	handler := &Handler{Store: data}
 
@@ -41,22 +42,45 @@ func FlushHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetHandler(w http.ResponseWriter, r *http.Request) {
-	//TODO implement me
-	panic("implement me")
+	key := r.URL.Query().Get("key")
+	if key == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad Request"))
+		return
+	}
+	value, err := h.Store.Get(key)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	w.Write([]byte(value))
 }
 
 type setHandler struct {
 	Key string `json:"key"`
-	Val string `json:"val"`
+	Val string `json:"value"`
 }
 
 func (h *Handler) SetHandler(w http.ResponseWriter, r *http.Request) {
-	set := setHandler{}
-	json.NewDecoder(r.Body).Decode(&set)
+	var set setHandler
+	err := json.NewDecoder(r.Body).Decode(&set)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Bad Request"))
+		return
+	}
 	if set.Key == "" || set.Val == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte("Key and Value is required"))
 		return
 	}
-	h.Store.Set(set.Key, set.Val)
+	err = h.Store.Set(set.Key, set.Val)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		return
+	} else {
+		w.Write([]byte("OK"))
+	}
 }

@@ -1,24 +1,30 @@
 package db
 
 import (
+	"errors"
 	"sync"
 )
 
-type Store struct {
-	sync.RWMutex
+type StoreData struct {
 	data map[string]string
+	sync.RWMutex
 }
 
-func New() *Store {
-	return &Store{data: make(map[string]string)}
+func New() *StoreData {
+	return &StoreData{data: make(map[string]string)}
 }
 
-func (store *Store) Get(key string) (string, error) {
-	//TODO implement me
-	panic("implement me")
+func (store *StoreData) Get(key string) (string, error) {
+	store.RLock()
+	defer store.RUnlock()
+	value, ok := store.data[key]
+	if !ok {
+		return "", errors.New("Key not found")
+	}
+	return value, nil
 }
 
-func (store *Store) Set(key string, value string) error {
+func (store *StoreData) Set(key string, value string) error {
 	store.Lock()
 	defer store.Unlock()
 	store.data[key] = value
