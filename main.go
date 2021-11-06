@@ -7,7 +7,8 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", controllers.Hello)
+	mux.HandleFunc("/", controllers.ReqHandler)
+	mux.HandleFunc("/flush", controllers.FlushHandler)
 
 	http.ListenAndServe(":8080", mux)
 }
